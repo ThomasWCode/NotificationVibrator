@@ -83,6 +83,9 @@ class PatternNotificationListener : NotificationListenerService() {
                 AudioManager.RINGER_MODE_VIBRATE -> RingerMode.VIBRATE
                 else -> RingerMode.NORMAL
             },
+            dndActive = currentInterruptionFilter.let {
+                it != INTERRUPTION_FILTER_ALL && it != INTERRUPTION_FILTER_UNKNOWN
+            },
         )
         val key = sbn.key
         val now = System.currentTimeMillis()

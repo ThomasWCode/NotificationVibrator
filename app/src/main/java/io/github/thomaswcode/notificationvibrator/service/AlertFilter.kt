@@ -21,6 +21,8 @@ data class AlertInput(
     val channelImportance: Int = AlertFilter.IMPORTANCE_DEFAULT,
     val matchesInterruptionFilter: Boolean = true,
     val ringerMode: RingerMode = RingerMode.VIBRATE,
+    /** Do Not Disturb is on (any interruption filter other than "all"). */
+    val dndActive: Boolean = false,
 )
 
 /** Why a notification did not vibrate. [logged] reasons appear in the activity log. */
@@ -77,7 +79,9 @@ class AlertFilter {
             input.onlyAlertOnce && input.isUpdate -> SkipReason.ALERT_ONCE_UPDATE
             !isAlertingImportance(input.channelImportance, includeSilentChannels) -> SkipReason.SILENT_CHANNEL
             patternIsSilent -> SkipReason.NO_VIBRATE
-            input.ringerMode == RingerMode.SILENT -> SkipReason.SILENT_MODE
+            // While DND is on, Android (notably One UI) reports the ringer as Silent even when the
+            // sound mode is Vibrate, so DND decides via matchesInterruptionFilter instead
+            input.ringerMode == RingerMode.SILENT && !input.dndActive -> SkipReason.SILENT_MODE
             !input.matchesInterruptionFilter -> SkipReason.DO_NOT_DISTURB
             else -> null
         }

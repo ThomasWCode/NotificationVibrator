@@ -71,6 +71,7 @@ fun SetupScreen() {
     var hasAccess by remember { mutableStateOf(SystemSettings.hasNotificationAccess(context)) }
     var batteryUnrestricted by remember { mutableStateOf(SystemSettings.isBatteryUnrestricted(context)) }
     var ringerMode by remember { mutableIntStateOf(AudioManager.RINGER_MODE_VIBRATE) }
+    var dndActive by remember { mutableStateOf(false) }
     var testMessage by remember { mutableStateOf<String?>(null) }
 
     // Statuses can change while the user is in system settings, so re-check whenever the screen resumes
@@ -78,6 +79,7 @@ fun SetupScreen() {
         hasAccess = SystemSettings.hasNotificationAccess(context)
         batteryUnrestricted = SystemSettings.isBatteryUnrestricted(context)
         ringerMode = context.getSystemService(AudioManager::class.java).ringerMode
+        dndActive = SystemSettings.isDndActive(context)
         onPauseOrDispose { }
     }
 
@@ -94,7 +96,14 @@ fun SetupScreen() {
             Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
+            if (dndActive) {
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+                    Text(
+                        "Do Not Disturb is on, so only apps and people that Do Not Disturb allows will buzz.",
+                        modifier = Modifier.padding(16.dp),
+                    )
+                }
+            } else if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                     Text(
                         "The phone is in Silent mode, so nothing will vibrate. Switch to Vibrate mode to use your patterns.",

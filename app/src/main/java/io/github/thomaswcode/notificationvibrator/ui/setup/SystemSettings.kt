@@ -27,6 +27,12 @@ object SystemSettings {
     fun isBatteryUnrestricted(context: Context): Boolean =
         context.getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(context.packageName)
 
+    /** DND is on when the interruption filter is anything other than "all". */
+    fun isDndActive(context: Context): Boolean =
+        context.getSystemService(NotificationManager::class.java).currentInterruptionFilter.let {
+            it != NotificationManager.INTERRUPTION_FILTER_ALL && it != NotificationManager.INTERRUPTION_FILTER_UNKNOWN
+        }
+
     fun canPostNotifications(context: Context): Boolean =
         context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 

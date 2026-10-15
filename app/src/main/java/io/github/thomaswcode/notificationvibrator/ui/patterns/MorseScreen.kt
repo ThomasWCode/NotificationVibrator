@@ -15,6 +15,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +45,8 @@ fun MorseScreen(onDone: () -> Unit) {
     val timings = remember(text, unitMs) { MorseEncoder.encode(text, unitMs.toLong()) }
     val pattern = VibrationPattern("custom:preview", "Morse", PatternCategory.CUSTOM, timings)
     val tooLong = pattern.totalDurationMs > CUSTOM_MAX_DURATION_MS
+
+    DisposableEffect(Unit) { onDispose { container.patternPlayer.cancel() } }
 
     ScreenScaffold(title = "Morse code", onBack = onDone) { padding ->
         Column(
@@ -76,7 +79,7 @@ fun MorseScreen(onDone: () -> Unit) {
                     if (tooLong) " — too long, max ${formatSeconds(CUSTOM_MAX_DURATION_MS)}. Shorten the text or speed it up." else "",
                 color = if (tooLong) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
             )
-            OutlinedButton(onClick = { container.preview(pattern, 1f) }, enabled = timings.isNotEmpty()) { Text("Play") }
+            OutlinedButton(onClick = { container.preview(pattern, 1f) }, enabled = timings.isNotEmpty() && !tooLong) { Text("Play") }
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it.take(40) },

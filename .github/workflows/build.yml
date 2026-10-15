@@ -35,14 +35,27 @@ jobs:
           name: NotificationVibrator-apk
           path: NotificationVibrator.apk
 
-      # A rolling "latest" pre-release gives a direct APK download link for the phone's browser
+  # A rolling "latest" pre-release gives a direct APK download link for the phone's browser.
+  # Every branch publishes to the same release, so publishing is serialised across all refs.
+  publish:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: publish-latest
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: NotificationVibrator-apk
+
       - name: Publish latest pre-release
-        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete latest --yes --cleanup-tag || true
+          gh release delete latest --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
           gh release create latest NotificationVibrator.apk \
+            --repo "$GITHUB_REPOSITORY" \
             --prerelease \
             --target "$GITHUB_SHA" \
             --title "Latest build" \
