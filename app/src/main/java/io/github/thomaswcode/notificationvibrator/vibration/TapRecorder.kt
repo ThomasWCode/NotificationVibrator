@@ -42,15 +42,28 @@ class TapRecorder(
         pressedAt = null
     }
 
-    /** Timings in the [0, on, off, on, ...] format. Empty if nothing was recorded. */
+    /**
+     * Timings in the [0, on, off, on, ...] format. Empty if nothing was recorded.
+     * Rounding very short taps up can add time, so the result is cut off at [maxDurationMs].
+     */
     fun build(): LongArray {
         if (presses.isEmpty()) return LongArray(0)
-        val out = mutableListOf(0L)
+        val segments = mutableListOf<Long>()
         var previousEnd: Long? = null
         for ((begin, end) in presses.map { it[0] to it[1] }) {
-            if (previousEnd != null) out += maxOf(MIN_OFF_MS, quantise(begin - previousEnd))
-            out += maxOf(MIN_ON_MS, quantise(end - begin))
+            if (previousEnd != null) segments += maxOf(MIN_OFF_MS, quantise(begin - previousEnd))
+            segments += maxOf(MIN_ON_MS, quantise(end - begin))
             previousEnd = end
+        }
+        val out = mutableListOf(0L)
+        var total = 0L
+        for ((index, segment) in segments.withIndex()) {
+            val remaining = maxDurationMs - total
+            if (remaining <= 0) break
+            // Never end on a pause: a trailing off segment adds nothing
+            if (index % 2 == 1 && segment >= remaining) break
+            out += minOf(segment, remaining)
+            total += out.last()
         }
         return out.toLongArray()
     }

@@ -3,6 +3,7 @@ package io.github.thomaswcode.notificationvibrator.service
 import android.app.Notification
 import android.content.ComponentName
 import android.media.AudioManager
+import android.os.SystemClock
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import io.github.thomaswcode.notificationvibrator.AppContainer
@@ -89,7 +90,8 @@ class PatternNotificationListener : NotificationListenerService() {
         )
         val key = sbn.key
         val now = System.currentTimeMillis()
-        scope.launch { handle(input, key, now) }
+        val elapsed = SystemClock.elapsedRealtime()
+        scope.launch { handle(input, key, now, elapsed) }
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
@@ -97,12 +99,13 @@ class PatternNotificationListener : NotificationListenerService() {
         scope.launch { activeKeys.remove(key) }
     }
 
-    private suspend fun handle(posted: AlertInput, key: String, now: Long) {
+    /** [now] is wall time for the log; [elapsed] is monotonic time for the cooldown. */
+    private suspend fun handle(posted: AlertInput, key: String, now: Long, elapsed: Long) {
         val input = posted.copy(isUpdate = activeKeys.put(key, Unit) != null)
         val snapshot = container.snapshot.filterNotNull().first()
         val pattern = snapshot.patternFor(input.packageName)
         val settings = snapshot.settings
-        val decision = alertFilter.decide(input, pattern.isSilent, settings.cooldownMs, settings.includeSilentChannels, now)
+        val decision = alertFilter.decide(input, pattern.isSilent, settings.cooldownMs, settings.includeSilentChannels, elapsed)
 
         if (decision == AlertDecision.Play) {
             container.patternPlayer.play(pattern, snapshot.intensityFor(input.packageName), settings.muteMode)

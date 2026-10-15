@@ -44,6 +44,9 @@ class AppsViewModel(application: Application) : AndroidViewModel(application) {
 
     val query = MutableStateFlow("")
 
+    /** False on motors that can only switch on and off, where strength settings have no effect. */
+    val amplitudeControl: Boolean = container.patternPlayer.hasAmplitudeControl
+
     val patterns: StateFlow<List<VibrationPattern>> =
         container.patternRepository.patterns.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PatternLibrary.all)
 
@@ -62,7 +65,9 @@ class AppsViewModel(application: Application) : AndroidViewModel(application) {
             defaultIntensity = snapshot.settings.defaultIntensity,
             assigned = snapshot.assignments.keys.map { row(it, snapshot) }.filter(::matches).sortedWith(byLabel),
             recent = seen.take(RECENT_LIMIT).map { row(it.packageName, snapshot) }.filter(::matches),
-            all = packages.orEmpty().map { row(it, snapshot) }.filter(::matches).sortedWith(byLabel),
+            // Launchable apps plus anything seen notifying, so non-launchable notifiers stay assignable
+            all = (packages.orEmpty() + seen.map { it.packageName }).distinct()
+                .map { row(it, snapshot) }.filter(::matches).sortedWith(byLabel),
         )
     }.flowOn(Dispatchers.IO).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppsUiState())
 

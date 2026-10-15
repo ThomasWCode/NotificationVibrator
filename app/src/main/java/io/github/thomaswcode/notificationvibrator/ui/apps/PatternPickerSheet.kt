@@ -44,6 +44,7 @@ fun PatternPickerSheet(
     initialPatternId: String,
     initialIntensity: Float,
     showReset: Boolean,
+    amplitudeControl: Boolean,
     onPreview: (VibrationPattern, Float) -> Unit,
     onSave: (patternId: String, intensity: Float) -> Unit,
     onReset: () -> Unit,
@@ -77,14 +78,22 @@ fun PatternPickerSheet(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Strength ${(intensity * 100).roundToInt()}%", Modifier.width(110.dp))
-                Slider(
-                    value = intensity,
-                    onValueChange = { intensity = it },
-                    valueRange = Waveforms.MIN_INTENSITY..Waveforms.MAX_INTENSITY,
-                    onValueChangeFinished = { selected?.let { onPreview(it, intensity) } },
-                    modifier = Modifier.weight(1f),
+            if (amplitudeControl) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Strength ${(intensity * 100).roundToInt()}%", Modifier.width(110.dp))
+                    Slider(
+                        value = intensity,
+                        onValueChange = { intensity = it },
+                        valueRange = Waveforms.MIN_INTENSITY..Waveforms.MAX_INTENSITY,
+                        onValueChangeFinished = { selected?.let { onPreview(it, intensity) } },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            } else {
+                Text(
+                    "This phone can't vary vibration strength; Soft and Shape patterns play at full strength.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {

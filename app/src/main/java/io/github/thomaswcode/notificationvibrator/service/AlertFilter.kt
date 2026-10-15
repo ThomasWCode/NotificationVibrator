@@ -72,9 +72,11 @@ class AlertFilter {
     private fun skipReason(input: AlertInput, patternIsSilent: Boolean, includeSilentChannels: Boolean): SkipReason? =
         when {
             input.isOwnPackage -> SkipReason.OWN_APP
-            input.isOngoing -> SkipReason.ONGOING
+            // Calls are usually also ongoing; check them first so they get the logged reason
             input.isCall -> SkipReason.CALL
-            input.isGroupSummary && input.groupAlert != GroupAlert.SUMMARY -> SkipReason.GROUP_SUMMARY
+            input.isOngoing -> SkipReason.ONGOING
+            // Like Android: only GROUP_ALERT_CHILDREN silences a summary
+            input.isGroupSummary && input.groupAlert == GroupAlert.CHILDREN -> SkipReason.GROUP_SUMMARY
             input.isGroupChild && input.groupAlert == GroupAlert.SUMMARY -> SkipReason.GROUP_CHILD_SILENCED
             input.onlyAlertOnce && input.isUpdate -> SkipReason.ALERT_ONCE_UPDATE
             !isAlertingImportance(input.channelImportance, includeSilentChannels) -> SkipReason.SILENT_CHANNEL
