@@ -32,7 +32,7 @@ class MainActivitySmokeTest {
     @Test
     fun perAppModeShowsItsInstructions() {
         compose.onNodeWithText("Per-app mute").performScrollTo().performClick()
-        compose.waitUntil(5_000) {
+        compose.waitUntil(WAIT_MS) {
             compose.onAllNodesWithTextCount("Vibrate for Silent categories") > 0
         }
     }
@@ -66,7 +66,12 @@ class MainActivitySmokeTest {
     @Test
     fun activityTabShowsEmptyState() {
         compose.onNodeWithText("Activity").performClick()
-        compose.waitUntil(5_000) { compose.onAllNodesWithTextCount("Nothing yet", substring = true) > 0 }
+        compose.waitUntil(WAIT_MS) { compose.onAllNodesWithTextCount("Nothing yet", substring = true) > 0 }
+    }
+
+    private companion object {
+        /** Settings writes run on a background thread, which can be slow on a cold test JVM. */
+        const val WAIT_MS = 15_000L
     }
 
     private fun androidx.compose.ui.test.junit4.AndroidComposeTestRule<*, *>.onAllNodesWithTextCount(

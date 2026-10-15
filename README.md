@@ -13,7 +13,7 @@ An Android app (built for the Galaxy S24, works on Android 13+) that vibrates wi
 - **Respects Silent mode and Do Not Disturb.** In Silent mode nothing vibrates. With DND on, only apps and people that DND allows through will buzz.
 - **One buzz per burst**: a cooldown (1.5 s by default, adjustable) means five quick WhatsApp messages buzz once.
 - **Activity tab** lists the last 200 decisions, e.g. *played Long* or *skipped: Phone in Silent mode*, so you can see why something did or didn't buzz.
-- Everything stays on the phone. The app has no internet permission.
+- No internet permission: the app never sends anything anywhere itself. If Android/Google backup is switched on, the app's data (assignments, custom patterns, settings and the activity log) is included in your Google backup, so it restores on a new phone.
 
 ## Install on your phone
 
@@ -71,7 +71,7 @@ It hasn't been confirmed that every One UI version lets the slider reach 0, or t
 
 ## What doesn't vibrate (by design)
 
-- Anything while the phone is in **Silent mode**, and anything **Do Not Disturb** blocks.
+- Anything while the phone is in **Silent mode**, and anything **Do Not Disturb** blocks. With DND on, apps and people that DND allows through still buzz. One UI reports the phone as Silent whenever DND is on, so while DND is on the app follows DND's rules rather than the sound mode.
 - **Incoming calls.** Your ringtone vibration handles those.
 - **Ongoing notifications** (music, navigation, downloads) and **updates** to a notification already showing, when the app marks them as "alert once".
 - **Silent notification categories.** These are categories the app or you set to Silent; Per-app mute has an option to include them.

@@ -91,6 +91,17 @@ class AlertFilterTest {
         assertEquals(skip(SkipReason.SILENT_MODE), decide(message.copy(ringerMode = RingerMode.SILENT)))
 
     @Test
+    fun silentReportedDuringDndLetsAllowedNotificationsPlay() =
+        assertEquals(AlertDecision.Play, decide(message.copy(ringerMode = RingerMode.SILENT, dndActive = true)))
+
+    @Test
+    fun silentReportedDuringDndStillSkipsBlockedNotifications() =
+        assertEquals(
+            skip(SkipReason.DO_NOT_DISTURB),
+            decide(message.copy(ringerMode = RingerMode.SILENT, dndActive = true, matchesInterruptionFilter = false)),
+        )
+
+    @Test
     fun doNotDisturbIsRespected() =
         assertEquals(skip(SkipReason.DO_NOT_DISTURB), decide(message.copy(matchesInterruptionFilter = false)))
 
