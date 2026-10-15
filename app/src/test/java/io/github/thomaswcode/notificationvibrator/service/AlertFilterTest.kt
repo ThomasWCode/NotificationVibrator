@@ -35,14 +35,21 @@ class AlertFilterTest {
     fun callsAreSkipped() = assertEquals(skip(SkipReason.CALL), decide(message.copy(isCall = true)))
 
     @Test
-    fun groupSummaryIsSkippedUnlessAppAlertsViaSummary() {
-        assertEquals(skip(SkipReason.GROUP_SUMMARY), decide(message.copy(isGroupSummary = true)))
+    fun groupSummaryIsSkippedOnlyWhenAppAlertsViaChildren() {
         assertEquals(
             skip(SkipReason.GROUP_SUMMARY),
             decide(message.copy(isGroupSummary = true, groupAlert = GroupAlert.CHILDREN)),
         )
-        assertEquals(AlertDecision.Play, decide(message.copy(isGroupSummary = true, groupAlert = GroupAlert.SUMMARY)))
+        assertEquals(AlertDecision.Play, decide(message.copy(isGroupSummary = true), nowMs = 10_000))
+        assertEquals(
+            AlertDecision.Play,
+            decide(message.copy(isGroupSummary = true, groupAlert = GroupAlert.SUMMARY), nowMs = 20_000),
+        )
     }
+
+    @Test
+    fun ongoingCallsAreLoggedAsCalls() =
+        assertEquals(skip(SkipReason.CALL), decide(message.copy(isCall = true, isOngoing = true)))
 
     @Test
     fun groupChildIsSkippedWhenAppAlertsViaSummary() {

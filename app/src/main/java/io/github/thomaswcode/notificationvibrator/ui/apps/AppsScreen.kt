@@ -104,6 +104,7 @@ fun AppsScreen(viewModel: AppsViewModel = viewModel()) {
             initialPatternId = target.patternId,
             initialIntensity = target.intensity,
             showReset = target.isAssigned,
+            amplitudeControl = viewModel.amplitudeControl,
             onPreview = viewModel::preview,
             onSave = { patternId, intensity ->
                 if (target.packageName == null) {

@@ -37,6 +37,19 @@ class TapRecorderTest {
     }
 
     @Test
+    fun roundingUpTinyTapsNeverExceedsTheCap() {
+        val recorder = TapRecorder(maxDurationMs = 1000)
+        // 200 taps of 2 ms with 3 ms gaps: 1 s raw, but each rounds up to 20 ms on / 10 ms off
+        for (i in 0 until 200) {
+            recorder.press(i * 5L)
+            recorder.release(i * 5L + 2)
+        }
+        val timings = recorder.build()
+        assertTrue("total ${timings.sum()}", timings.sum() <= 1000)
+        assertEquals("ends on a buzz", 1, (timings.size - 1) % 2)
+    }
+
+    @Test
     fun resetClearsTheRecording() {
         val recorder = TapRecorder()
         recorder.press(0); recorder.release(100)
