@@ -55,7 +55,7 @@ Android doesn't let one app block another app's vibration, so you turn off the s
 
 This works because the app plays its patterns as *alarm-type* vibrations, which have their own intensity setting.
 
-I couldn't confirm in advance that One UI lets the slider reach 0, or that alarm-type vibrations survive it — that's what the two tests check. If Test 2 doesn't buzz, use Per-app mute instead and put the Notifications slider back up.
+It hasn't been confirmed that every One UI version lets the slider reach 0, or that alarm-type vibrations survive it — that's what the two tests check. If Test 2 doesn't buzz, use Per-app mute instead and put the Notifications slider back up.
 
 **Per-app mute (fallback):**
 
